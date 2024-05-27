@@ -1,28 +1,24 @@
-note WEB3
+NOTE WEB3;
 
-vb.net ddl connection:
 
 Imports MySql.Data.MySqlClient
 Public Class Form1
 
-
-Dim myConn As New MySqlConnection(&quot;Server=localhost; User ID=root; Password=; Database=sample&quot;)
-Dim myDT As New DataTable
+	Dim myConn As New MySqlConnection("Server=localhost; User ID=root; Password=; Database=sample")
+	Dim myDT As New DataTable
 
 
 Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-	display()
+	
 End Sub
 
 
 Public Sub display()
-	Dim myAdapter As New MySqlDataAdapter(&quot;Select * from students&quot;, myConn)
-
+	Dim myAdapter As New MySqlDataAdapter("Select * from students", myConn)
 	myDT.Clear()
 	myAdapter.Fill(myDT)
-
 	myGrid.DataSource = myDT
-End Sub
+End 
 
 
 Public Sub Clear()
@@ -40,10 +36,11 @@ End Sub
 
 
 Private Sub txtSearch_TextChanged(sender As Object, e As EventArgs) Handles txtSearch.TextChanged
-	Dim searchAdapter As New MySqlDataAdapter(&quot;Select * from students where lname like &#39;%&quot; &amp; txtSearch.Text &amp; &quot;%&#39; or fname like &#39;%&quot;
-	&amp; txtSearch.Text &amp; &quot;%&#39;&quot;, myConn)
+	Dim searchAdapter As New MySqlDataAdapter("Select * from students where lname like '%" & txtSearch.Text & "%' or fname like '%"
+	& txtSearch.Text & "%'", myConn)
+	
 	myDT.Clear()
-
+	
 	searchAdapter.Fill(myDT)
 	myGrid.DataSource = myDT
 End Sub
@@ -51,34 +48,31 @@ End Sub
 
 Private Sub btnAdd_Click(sender As Object, e As EventArgs) Handles btnAdd.Click
 	Dim strSQL As String
-
-	strSQL = &quot;Insert Into students values(&#39;&quot; &amp; txtID.Text &amp; &quot;&#39;, &#39;&quot; &amp; txtLname.Text &amp; &quot;&#39;, &#39;&quot; &amp; txtFname.Text &amp; &quot;&#39;, &#39;&quot; &amp;
-	txtCourse.Text &amp; &quot;&#39;, &#39;&quot; &amp; txtEmail.Text &amp; &quot;&#39;)&quot;
-
+	strSQL = "Insert Into students values('" & txtID.Text & "', '" & txtLname.Text & "', '" & txtFname.Text & "', '" &txtCourse.Text & "', '" & txtEmail.Text & "')"
+	
 	Dim myCMD As New MySqlCommand
-	Dim checkAdapter As New MySqlDataAdapter(&quot;select * from students where idnum = &#39;&quot; &amp; txtID.Text &amp; &quot;&#39;&quot;, myConn)
-
+	Dim checkAdapter As New MySqlDataAdapter("select * from students where idnum = '" & txtID.Text & "'", myConn)
+	
 	myDT.Clear()
-
+	
 	checkAdapter.Fill(myDT)
-
-	If myDT.Rows.Count &gt; 0 Then
-	MsgBox(&quot;Record already exists!&quot;, MsgBoxStyle.Critical, &quot;Duplicate Record&quot;)
-	Exit Sub
-	End If
-
-	If myConn.State = ConnectionState.Closed Then
-	myConn.Open()
-	End If
-
+		If myDT.Rows.Count > 0 Then
+		MsgBox("Record already exists!", MsgBoxStyle.Critical, "Duplicate Record")
+		Exit Sub
+		End If
+		
+		If myConn.State = ConnectionState.Closed Then
+		myConn.Open()
+		End If
+	
 	myCMD.Connection = myConn
 	myCMD.CommandText = strSQL
-
+	
 	myCMD.ExecuteNonQuery()
 	myConn.Close()
+	
 	display()
 	Clear()
-
 End Sub
 
 
@@ -88,34 +82,32 @@ Private Sub btnEdit_Click(sender As Object, e As EventArgs) Handles btnEdit.Clic
 	Dim myCMd As New MySqlCommand
 
 	selRow = myGrid.CurrentRow.Index
-
-	If btnEdit.Text = &quot;Edit&quot; Then
-	txtID.Text = myGrid.Item(0, selRow).Value
-	txtLname.Text = myGrid.Item(1, selRow).Value
-	txtFname.Text = myGrid.Item(2, selRow).Value
-	txtCourse.Text = myGrid.Item(3, selRow).Value
-	txtEmail.Text = myGrid.Item(4, selRow).Value
-	btnEdit.Text = &quot;Save&quot;
-
+	
+	If btnEdit.Text = "Edit" Then
+		txtID.Text = myGrid.Item(0, selRow).Value
+		txtLname.Text = myGrid.Item(1, selRow).Value
+		txtFname.Text = myGrid.Item(2, selRow).Value
+		txtCourse.Text = myGrid.Item(3, selRow).Value
+		txtEmail.Text = myGrid.Item(4, selRow).Value
+		btnEdit.Text = "Save"
 	Else
-	&#39;code for updating record
-	strSQL = &quot;Update students set lname = &#39;&quot; &amp; txtLname.Text &amp; &quot;&#39;, fname = &#39;&quot; &amp; txtFname.Text &amp; &quot;&#39;, course = &#39;&quot; &amp; txtCourse.Text
-	&amp; &quot;&#39;, email = &#39;&quot; &amp; txtEmail.Text &amp; &quot;&#39; where idnum = &#39;&quot; &amp; txtID.Text &amp; &quot;&#39;&quot;
-		If myConn.State = ConnectionState.Closed Then
-		myConn.Open()
-
-		End If
-
-	myCMd.Connection = myConn
-	myCMd.CommandText = strSQL
-
-	myCMd.ExecuteNonQuery()
-	myConn.Close()
-	MsgBox(&quot;Record Updated&quot;)
-	display()
-	Clear()
-	btnEdit.Text = &quot;Edit&quot;
-
+		strSQL = "Update students set lname = '" & txtLname.Text & "', fname = '" & txtFname.Text & "', course = '" & txtCourse.Text & "', email = '" & txtEmail.Text & "' where idnum = '" & txtID.Text & "'"
+			
+			If myConn.State = ConnectionState.Closed Then
+			myConn.Open()
+			End If
+			
+		myCMd.Connection = myConn
+		myCMd.CommandText = strSQL
+		
+		myCMd.ExecuteNonQuery()
+		myConn.Close()
+		MsgBox("Record Updated")
+		
+		display()
+		Clear()
+		
+		btnEdit.Text = "Edit"
 	End If
 
 End Sub
@@ -128,18 +120,20 @@ Private Sub btnDelete_Click(sender As Object, e As EventArgs) Handles btnDelete.
 
 	Dim ans As Integer
 	selRow = myGrid.CurrentRow.Index
-	ans = MsgBox(&quot;Are you sure you want to delete Record of Student: &quot; + myGrid.Item(0, selRow).Value, MsgBoxStyle.YesNo +
-	MsgBoxStyle.Question, &quot;Delete Record&quot;)
-
+	ans = MsgBox("Are you sure you want to delete Record of Student: " + myGrid.Item(0, selRow).Value, MsgBoxStyle.YesNo +
+	MsgBoxStyle.Question, "Delete Record")
+	
 	If ans = 6 Then
-	strSQL = &quot;Delete from students where idnum = &#39;&quot; &amp; myGrid.Item(0, selRow).Value &amp; &quot;&#39;&quot;
+		strSQL = "Delete from students where idnum = '" & myGrid.Item(0, selRow).Value & "'"
 		If myConn.State = ConnectionState.Closed Then
 		myConn.Open()
-		End If
+	End If
+	
 	mycmd.Connection = myConn
 	mycmd.CommandText = strSQL
 	mycmd.ExecuteNonQuery()
 	myConn.Close()
+	
 	display()
 	End If
 
