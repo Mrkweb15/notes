@@ -146,17 +146,7 @@ def main():
                 subprocess.run('cls', shell=True)
                 display_mrk_pattern()
                 inspect_wifi_network(selected_ssid)
-                
-                view_password = input(f"\n{Color.GREEN}Do you want to view the password for '{selected_ssid}'? (yes/no): {Color.RESET}").strip().lower()
-                
-                if view_password == 'yes':
-                    subprocess.run('cls', shell=True)
-                    display_mrk_pattern()
-                    
-                    password = get_wifi_password(selected_ssid)
-                    print(f"\n{Color.GREEN}Wi-Fi Name: {Color.BLUE}{selected_ssid}{Color.RESET}")
-                    print(f"{Color.GREEN}Password: {Color.BLUE}{password}{Color.RESET}")
-                
+
                 input(f"\n{Color.GREEN}Press Enter to continue...{Color.RESET}")
                 
                 subprocess.run('cls', shell=True)
@@ -175,10 +165,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
