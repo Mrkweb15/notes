@@ -1,85 +1,184 @@
-NOTE CC103
+import subprocess
+import os
+import re
+import signal
+import sys
+import time
 
-BOBBLE SORT CODE:
+# ANSI escape codes for colors and styles
+class Color:
+    RED = '\033[91m'
+    GREEN = '\033[92m'
+    BLUE = '\033[94m'
+    YELLOW = '\033[93m'
+    RESET = '\033[0m'
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+def run_command(command):
+    try:
+        result = subprocess.run(command, capture_output=True, text=True, check=True)
+        return result.stdout
+    except subprocess.CalledProcessError as e:
+        print(f"{Color.RED}Command failed: {e}{Color.RESET}")
+        return ""
 
-namespace bubble_sort
-{
-    class Program
-    {
-        static void Main()
-        {
-            int[] arr = { 64, 34, 25, 12, 22, 11, 90 };
-            Console.Write("Original array: ");
-            PrintArray(arr);
+def list_wifi_networks_windows():
+    """List available Wi-Fi networks on Windows."""
+    networks = run_command(['netsh', 'wlan', 'show', 'network'])
+    if not networks:
+        return []
 
-            BubbleSortAscending(arr);
-            Console.Write("Sorted array in ascending order: ");
-            PrintArray(arr);
-            Console.WriteLine();
+    network_lines = [line.strip() for line in networks.split('\n') if 'SSID' in line]
+    network_names = [line.split(':')[1].strip() for line in network_lines]
 
-            arr = new int[] { 64, 34, 25, 12, 22, 11, 90 };
-            BubbleSortDescending(arr);
-            Console.Write("Sorted array in descending order: ");
-            PrintArray(arr);
+    print(f"{Color.GREEN}Available Wi-Fi Networks:{Color.RESET}\n")
+    for idx, network_name in enumerate(network_names):
+        print(f"{Color.GREEN}{idx + 1}. {network_name}{Color.RESET}")
 
-            Console.ReadKey();
-        }
+    return network_names
 
-        static void BubbleSortAscending(int[] arr)
-        {
-            int cnt = 1;
-            int n = arr.Length;
-            for (int i = 0; i < n - 1; i++)
-            {
-                for (int j = 0; j < n - i - 1; j++)
-                {
-                    if (arr[j] > arr[j + 1])
-                    {
-                        int temp = arr[j];
-                        arr[j] = arr[j + 1];
-                        arr[j + 1] = temp;
-                    }
-                    Console.Write((cnt) + ": ");
-                    PrintArray(arr);
-                    cnt++;
-                }
-            }
-        }
+def get_wifi_password(ssid):
+    """Retrieve the password for a specific SSID."""
+    profile_info = run_command(['netsh', 'wlan', 'show', 'profile', ssid, 'key=clear'])
+    if not profile_info:
+        return f"{Color.RED}No password found or the network is not saved on this device.{Color.RESET}"
 
-        static void BubbleSortDescending(int[] arr)
-        {
-            int cnt = 1;
-            int n = arr.Length;
-            for (int i = 0; i < n - 1; i++)
-            {
-                for (int j = 0; j < n - i - 1; j++)
-                {
-                    if (arr[j] < arr[j + 1])
-                    {
-                        int temp = arr[j];
-                        arr[j] = arr[j + 1];
-                        arr[j + 1] = temp;
-                    }
-                    Console.Write((cnt) + ": ");
-                    PrintArray(arr);
-                    cnt++;
-                }
-            }
-        }
+    match = re.search(r'Key Content\s*:\s*(.*)', profile_info)
+    if match:
+        return match.group(1)
+    else:
+        return f"{Color.RED}No password found or the network is not saved on this device.{Color.RESET}"
 
-        static void PrintArray(int[] arr)
-        {
-            foreach (int item in arr)
-            {
-                Console.Write(item + " ");
-            }
-            Console.WriteLine();
-        }
-    }
-}
+def inspect_wifi_network(ssid):
+    """Inspect and display details of a selected Wi-Fi network."""
+    network_details = run_command(['netsh', 'wlan', 'show', 'profile', ssid, 'key=clear'])
+    if not network_details:
+        print(f"{Color.RED}Error retrieving network details.{Color.RESET}")
+        return
+
+    print(f"\n{Color.GREEN}Details for '{ssid}':{Color.RESET}\n")
+    print(f"{Color.GREEN}{network_details}{Color.RESET}")
+
+    print(f"\n{Color.GREEN}Security Information:{Color.RESET}\n")
+    lines = network_details.split('\n')
+    for line in lines:
+        if 'Authentication' in line or 'Encryption' in line:
+            print(f"{Color.GREEN}{line}{Color.RESET}")
+
+def display_mrk_pattern():
+    """Display a stylized MRK pattern."""
+    M = [
+        "MM       MM",
+        "MMM     MMM",
+        "MM MM MM MM",
+        "MM  MMM  MM",
+        "MM       MM",
+        "MM ",
+    ]
+    R = [
+        "RRRRRR ",
+        "RR   RR",
+        "RRRRRR ",
+        "RR  RR ",
+        "RR   RR",
+        " KNOWN WIFI SCANNER ",
+    ]
+    K = [
+        "KK    KK",
+        "KK   KK ",
+        "KKKKK   ",
+        "KK   KK ",
+        "KK    KK",
+        " KK",
+    ]
+
+    terminal_width = os.get_terminal_size().columns
+
+    print(f"{Color.RED}{'#' * terminal_width}{Color.RESET}")
+    for i in range(len(M)):
+        combined_line = f"{Color.RED}{M[i]}{Color.RESET}  {Color.RED}{R[i]}{Color.RESET}  {Color.RED}{K[i]}{Color.RESET}"
+        centered_line = combined_line.center(terminal_width)
+        print(centered_line)
+    print(f"{Color.RED}{'#' * terminal_width}{Color.RESET}")
+
+def signal_handler(sig, frame):
+    """Handle exit signal."""
+    subprocess.run('cls', shell=True)
+    
+    print(f"\n{Color.YELLOW}Exiting...{Color.RESET}")
+    
+    time.sleep(2)
+    
+    subprocess.run('cls', shell=True)
+    
+    sys.exit(0)
+
+def main():
+    signal.signal(signal.SIGINT, signal_handler)
+    
+    while True:
+        subprocess.run('cls', shell=True)
+        display_mrk_pattern()
+        
+        network_names = list_wifi_networks_windows()
+        
+        if not network_names:
+            print(f"{Color.RED}No Wi-Fi networks found.{Color.RESET}")
+            continue
+        
+        try:
+            choice = input(f"\n{Color.GREEN}Enter the number of the Wi-Fi network you want to inspect (or 'exit' to quit, 0 to refresh): {Color.RESET}")
+
+            if choice.lower() == 'exit':
+                subprocess.run('cls', shell=True)
+                print(f"\n{Color.YELLOW}Exiting...{Color.RESET}")
+                time.sleep(2)  # Wait for 2 seconds
+                subprocess.run('cls', shell=True)
+                sys.exit(0)
+            
+            choice = int(choice)
+
+            if choice == 0:
+                continue
+            
+            if 1 <= choice <= len(network_names):
+                selected_ssid = network_names[choice - 1]
+                
+                subprocess.run('cls', shell=True)
+                display_mrk_pattern()
+                inspect_wifi_network(selected_ssid)
+                
+                view_password = input(f"\n{Color.GREEN}Do you want to view the password for '{selected_ssid}'? (yes/no): {Color.RESET}").strip().lower()
+                
+                if view_password == 'yes':
+                    subprocess.run('cls', shell=True)
+                    display_mrk_pattern()
+                    
+                    password = get_wifi_password(selected_ssid)
+                    print(f"\n{Color.GREEN}Wi-Fi Name: {Color.BLUE}{selected_ssid}{Color.RESET}")
+                    print(f"{Color.GREEN}Password: {Color.BLUE}{password}{Color.RESET}")
+                
+                input(f"\n{Color.GREEN}Press Enter to continue...{Color.RESET}")
+                
+                subprocess.run('cls', shell=True)
+                display_mrk_pattern()
+                
+                print(f"\n{Color.GREEN}Other Available Wi-Fi Networks:{Color.RESET}\n")
+                for idx, network_name in enumerate(network_names):
+                    if network_name != selected_ssid:
+                        print(f"{Color.GREEN}{idx + 1}. {network_name}{Color.RESET}")
+
+            else:
+                print(f"{Color.RED}Invalid choice. Please enter a number from the list.{Color.RESET}")
+
+        except ValueError:
+            print(f"{Color.RED}Invalid input. Please enter a number or 'exit' to quit.{Color.RESET}")
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+
+
+
