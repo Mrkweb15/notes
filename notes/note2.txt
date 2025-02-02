@@ -1,141 +1,130 @@
-NOTE WEB3;
+namespace floating
+{
+    public partial class Form1 : Form
+    {
+        Random rnd = new Random();
+
+        private int objWidth, objX, objY, volX, volY;
+        private const int objHeight = 50;
+
+        private int pbWidth, pbX, pbY, pbVolX, pbVolY;
+        private const int pbHeight = 50;
+
+        private int pb2X, pb2Y, pb2VolX;
+        private const int pb2Height = 50;
+        private const int pb2Width = 50;
+
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            volX = rnd.Next(1, 4);
+            volY = rnd.Next(1, 4);
+            pbVolX = rnd.Next(1, 4);
+            pbVolY = rnd.Next(1, 4);
+            pb2VolX = 3;
+
+            objX = rnd.Next(0, ClientSize.Width - label1.Width);
+            objY = rnd.Next(0, ClientSize.Height - objHeight);
+            objWidth = label1.Width;
+
+            pbX = rnd.Next(0, ClientSize.Width - pictureBox1.Width);
+            pbY = rnd.Next(0, ClientSize.Height - pbHeight);
+            pbWidth = pictureBox1.Width;
+
+            pb2X = 0;
+
+            this.SetStyle(
+                ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.UserPaint |
+                ControlStyles.DoubleBuffer,
+                true
+            );
+
+            timer1.Start();
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            label1.Left = objX;
+            label1.Top = objY;
+
+            objX += volX;
+            if (objX < 0 || objX + objWidth > ClientSize.Width)
+            {
+                volX = -volX;
+                label1.ForeColor = Color.FromArgb(rnd.Next(255), rnd.Next(255), rnd.Next(255));
+            }
+
+            objY += volY;
+            if (objY < 0 || objY + objHeight > ClientSize.Height)
+            {
+                volY = -volY;
+                label1.ForeColor = Color.FromArgb(rnd.Next(255), rnd.Next(255), rnd.Next(255));
+            }
+
+            pictureBox1.Left = pbX;
+            pictureBox1.Top = pbY;
+
+            pbX += pbVolX;
+            if (pbX < 0 || pbX + pbWidth > ClientSize.Width)
+            {
+                pbVolX = -pbVolX;
+            }
+
+            pbY += pbVolY;
+            if (pbY < 0 || pbY + pbHeight > ClientSize.Height)
+            {
+                pbVolY = -pbVolY;
+            }
+
+            pictureBox2.Left = pb2X;
+
+            pb2X += pb2VolX;
+            if (pb2X > ClientSize.Width)
+            {
+                pb2X = -pb2Width;
+            }
+
+            Rectangle labelRect = new Rectangle(objX, objY, objWidth, objHeight);
+            Rectangle pbRect = new Rectangle(pbX, pbY, pbWidth, pbHeight);
+            Rectangle pb2Rect = new Rectangle(pb2X, pb2Y, pb2Width, pb2Height);
+
+            // Collision with pictureBox1
+            if (labelRect.IntersectsWith(pbRect))
+            {
+                int tempX = volX;
+                int tempY = volY;
+                volX = pbVolX;
+                volY = pbVolY;
+                pbVolX = tempX;
+                pbVolY = tempY;
+
+                label1.ForeColor = Color.FromArgb(rnd.Next(255), rnd.Next(255), rnd.Next(255));
+            }
+
+            // Collision with pictureBox2 (horizontal wall)
+            if (labelRect.IntersectsWith(pb2Rect))
+            {
+                volX = -volX;
+            }
+
+            // Make pictureBox1 also bounce from pictureBox2
+            if (pbRect.IntersectsWith(pb2Rect))
+            {
+                pbVolX = -pbVolX;
+            }
 
 
-Imports MySql.Data.MySqlClient
-Public Class Form1
+            Refresh();
+        }
 
-	Dim myConn As New MySqlConnection("Server=localhost; User ID=root; Password=; Database=sample")
-	Dim myDT As New DataTable
+        private void label1_Click(object sender, EventArgs e)
+        {
 
-
-Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-	display()
-End Sub
-
-
-Public Sub display()
-	Dim myAdapter As New MySqlDataAdapter("Select * from students", myConn)
-	myDT.Clear()
-	myAdapter.Fill(myDT)
-	myGrid.DataSource = myDT
-End 
-
-
-Public Sub Clear()
-	txtID.Clear()
-	txtLname.Clear()
-	txtFname.Clear()
-	txtCourse.Clear()
-	txtEmail.Clear()
-End Sub
-
-
-Private Sub btnView_Click(sender As Object, e As EventArgs) Handles btnView.Click
-	display()
-End Sub
-
-
-Private Sub txtSearch_TextChanged(sender As Object, e As EventArgs) Handles txtSearch.TextChanged
-	Dim searchAdapter As New MySqlDataAdapter("Select * from students where lname like '%" & txtSearch.Text & "%' or fname like '%"
-	& txtSearch.Text & "%'", myConn)
-	
-	myDT.Clear()
-	
-	searchAdapter.Fill(myDT)
-	myGrid.DataSource = myDT
-End Sub
-
-
-Private Sub btnAdd_Click(sender As Object, e As EventArgs) Handles btnAdd.Click
-	Dim strSQL As String
-	strSQL = "Insert Into students values('" & txtID.Text & "', '" & txtLname.Text & "', '" & txtFname.Text & "', '" &txtCourse.Text & "', '" & txtEmail.Text & "')"
-	
-	Dim myCMD As New MySqlCommand
-	Dim checkAdapter As New MySqlDataAdapter("select * from students where idnum = '" & txtID.Text & "'", myConn)
-	
-	myDT.Clear()
-	
-	checkAdapter.Fill(myDT)
-		If myDT.Rows.Count > 0 Then
-		MsgBox("Record already exists!", MsgBoxStyle.Critical, "Duplicate Record")
-		Exit Sub
-		End If
-		
-		If myConn.State = ConnectionState.Closed Then
-		myConn.Open()
-		End If
-	
-	myCMD.Connection = myConn
-	myCMD.CommandText = strSQL
-	
-	myCMD.ExecuteNonQuery()
-	myConn.Close()
-	
-	display()
-	Clear()
-End Sub
-
-
-Private Sub btnEdit_Click(sender As Object, e As EventArgs) Handles btnEdit.Click
-	Dim selRow As Integer
-	Dim strSQL As String
-	Dim myCMd As New MySqlCommand
-
-	selRow = myGrid.CurrentRow.Index
-	
-	If btnEdit.Text = "Edit" Then
-		txtID.Text = myGrid.Item(0, selRow).Value
-		txtLname.Text = myGrid.Item(1, selRow).Value
-		txtFname.Text = myGrid.Item(2, selRow).Value
-		txtCourse.Text = myGrid.Item(3, selRow).Value
-		txtEmail.Text = myGrid.Item(4, selRow).Value
-		btnEdit.Text = "Save"
-	Else
-		strSQL = "Update students set lname = '" & txtLname.Text & "', fname = '" & txtFname.Text & "', course = '" & txtCourse.Text & "', email = '" & txtEmail.Text & "' where idnum = '" & txtID.Text & "'"
-			
-			If myConn.State = ConnectionState.Closed Then
-			myConn.Open()
-			End If
-			
-		myCMd.Connection = myConn
-		myCMd.CommandText = strSQL
-		
-		myCMd.ExecuteNonQuery()
-		myConn.Close()
-		MsgBox("Record Updated")
-		
-		display()
-		Clear()
-		
-		btnEdit.Text = "Edit"
-	End If
-
-End Sub
-
-
-Private Sub btnDelete_Click(sender As Object, e As EventArgs) Handles btnDelete.Click
-	Dim strSQL As String
-	Dim selRow As Integer
-	Dim mycmd As New MySqlCommand
-
-	Dim ans As Integer
-	selRow = myGrid.CurrentRow.Index
-	ans = MsgBox("Are you sure you want to delete Record of Student: " + myGrid.Item(0, selRow).Value, MsgBoxStyle.YesNo +
-	MsgBoxStyle.Question, "Delete Record")
-	
-	If ans = 6 Then
-		strSQL = "Delete from students where idnum = '" & myGrid.Item(0, selRow).Value & "'"
-		If myConn.State = ConnectionState.Closed Then
-		myConn.Open()
-	End If
-	
-	mycmd.Connection = myConn
-	mycmd.CommandText = strSQL
-	mycmd.ExecuteNonQuery()
-	myConn.Close()
-	
-	display()
-	End If
-
-End Sub
-End Class
+        }
+    }
+}
