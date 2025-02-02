@@ -53,7 +53,7 @@ function Display-NotePad {
 
 # Add event handlers for the buttons
 $button1 = New-Object System.Windows.Forms.Button
-$button1.Text = "CC104"
+$button1.Text = "Note 1"
 $button1.Size = New-Object System.Drawing.Size(150, 40)
 $button1.Location = New-Object System.Drawing.Point(20, 500)
 $button1.Anchor = 'Bottom, Left'
@@ -73,7 +73,7 @@ $button1.Add_MouseLeave({
 
 # Create a button for WEB3
 $button2 = New-Object System.Windows.Forms.Button
-$button2.Text = "WEB3"
+$button2.Text = "Note 2"
 $button2.Size = New-Object System.Drawing.Size(150, 40)
 $button2.Location = New-Object System.Drawing.Point(200, 500)
 $button2.Anchor = 'Bottom, Left'
