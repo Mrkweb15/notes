@@ -38,11 +38,6 @@ namespace Flappy_Bird
         private void Form1_Load(object sender, EventArgs e)
         {
             score = 0;
-
-            txtGameOver.Left = (ClientSize.Width - txtGameOver.Width) / 2;
-            txtEndScore.Left = (ClientSize.Width - txtEndScore.Width) / 2;
-            txtGameOver.Hide();
-            txtEndScore.Hide();   
         }
 
         private void gameTimerEvent(object sender, EventArgs e)
@@ -76,8 +71,6 @@ namespace Flappy_Bird
             if (flappyBird.Bounds.IntersectsWith(pipeTop.Bounds) || flappyBird.Bounds.IntersectsWith(pipeBottom.Bounds) || flappyBird.Bounds.IntersectsWith(ground.Bounds) || flappyBird.Top < 0)
             {
                 birdVelocity = 0;
-                txtEndScore.Show();
-                txtGameOver.Show();
                 scoreText.Hide();
                 gameTimer.Stop();
             }
@@ -87,7 +80,6 @@ namespace Flappy_Bird
             {
                 score += 1;
                 scoreText.Text = "Score: " + score.ToString();
-                txtEndScore.Text = "Score: " + score.ToString();
                 passedPipe = true;
             }
             //score logic every bottom pipe na malalampasan
@@ -95,7 +87,6 @@ namespace Flappy_Bird
             {
                 score += 1;
                 scoreText.Text = "Score: " + score.ToString();
-                txtEndScore.Text = "Score: " + score.ToString();
                 passedPipe = true;
             }
 
@@ -129,6 +120,5 @@ namespace Flappy_Bird
         }
     }
 }
-
 
 https://drive.google.com/drive/folders/1mZvvMqbTQwoKclzFAwKWrLNlZXPBaXW5?usp=sharing
