@@ -59,11 +59,24 @@ namespace plane_defender
             {
                 shooting = false;
             }
+
+
+            if (!timer1.Enabled && e.KeyCode == Keys.Space)
+            {
+                timer1.Enabled = true;
+                myPlane.Top = (myPlane.Height / 2) + (ClientSize.Height / 2);
+                score = 0;
+                hp = 10;
+                txtGameOver.Hide();
+                txtEndScore.Hide();
+                explosion.Hide();
+            }
         }
 
 
         private void timer1_Tick(object sender, EventArgs e)
         {
+
             if (up)
             {
                 myPlane.Top -= 10;
@@ -99,6 +112,7 @@ namespace plane_defender
                 explosion.Show();
                 shooting = false;
                 bullet.Hide();
+                bullet.Left = 0;
                 enemy1.Left = ClientSize.Width;
 
             }
