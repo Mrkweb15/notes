@@ -1,19 +1,19 @@
-namespace floating
+namespace plane_defender
 {
     public partial class Form1 : Form
     {
         Random rnd = new Random();
+        int score = 0;
+        int hp = 10;
 
-        private int objWidth, objX, objY, volX, volY;
-        private const int objHeight = 50;
+        //myPlane
+        bool up, down, shooting = false;
+        int BulletSpeed = 20;
 
-        private int pbWidth, pbX, pbY, pbVolX, pbVolY;
-        private const int pbHeight = 50;
-
-        private int pb2X, pb2Y, pb2VolX;
-        private const int pb2Height = 50;
-        private const int pb2Width = 50;
-
+        //enemy
+        int enemySpeed = 5;
+        bool enemy1MovingUp = true;
+        bool enemy2MovingUp = false;
         public Form1()
         {
             InitializeComponent();
@@ -21,110 +21,185 @@ namespace floating
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            volX = rnd.Next(1, 4);
-            volY = rnd.Next(1, 4);
-            pbVolX = rnd.Next(1, 4);
-            pbVolY = rnd.Next(1, 4);
-            pb2VolX = 3;
-
-            objX = rnd.Next(0, ClientSize.Width - label1.Width);
-            objY = rnd.Next(0, ClientSize.Height - objHeight);
-            objWidth = label1.Width;
-
-            pbX = rnd.Next(0, ClientSize.Width - pictureBox1.Width);
-            pbY = rnd.Next(0, ClientSize.Height - pbHeight);
-            pbWidth = pictureBox1.Width;
-
-            pb2X = 0;
-
-            this.SetStyle(
-                ControlStyles.AllPaintingInWmPaint |
-                ControlStyles.UserPaint |
-                ControlStyles.DoubleBuffer,
-                true
-            );
-
-            timer1.Start();
+            bullet.Hide();
+            explosion.Hide();
+            txtGameOver.Hide();
+            txtEndScore.Hide();
+            txtGameOver.Left = (ClientSize.Width - txtGameOver.Width) / 2;
+            txtEndScore.Left = (ClientSize.Width - txtEndScore.Width) / 2;
         }
+
+        private void keyIDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Up)
+            {
+                up = true;
+            }
+            if (e.KeyCode == Keys.Down)
+            {
+                down = true;
+            }
+            if (e.KeyCode == Keys.Space)
+            {
+                shooting = true;
+            }
+        }
+
+        private void keyIsUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Up)
+            {
+                up = false;
+            }
+            if (e.KeyCode == Keys.Down)
+            {
+                down = false;
+            }
+            if (e.KeyCode == Keys.Space)
+            {
+                shooting = false;
+            }
+        }
+
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            label1.Left = objX;
-            label1.Top = objY;
-
-            objX += volX;
-            if (objX < 0 || objX + objWidth > ClientSize.Width)
+            if (up)
             {
-                volX = -volX;
-                label1.ForeColor = Color.FromArgb(rnd.Next(255), rnd.Next(255), rnd.Next(255));
+                myPlane.Top -= 10;
+            }
+            if (down)
+            {
+                myPlane.Top += 10;
             }
 
-            objY += volY;
-            if (objY < 0 || objY + objHeight > ClientSize.Height)
+            //shooting
+            if (shooting)
             {
-                volY = -volY;
-                label1.ForeColor = Color.FromArgb(rnd.Next(255), rnd.Next(255), rnd.Next(255));
+                bullet.Left += enemySpeed;
+                bullet.Top = myPlane.Top + (myPlane.Height / 2) - (bullet.Height / 2);
+                bullet.Left = myPlane.Left + myPlane.Width;
+                bullet.Show();
+                bullet.Left += enemySpeed;
             }
 
-            pictureBox1.Left = pbX;
-            pictureBox1.Top = pbY;
+            bullet.Left += BulletSpeed;
 
-            pbX += pbVolX;
-            if (pbX < 0 || pbX + pbWidth > ClientSize.Width)
+            if (bullet.Left > ClientSize.Width)
             {
-                pbVolX = -pbVolX;
+                bullet.Hide();
+                shooting = false;
             }
 
-            pbY += pbVolY;
-            if (pbY < 0 || pbY + pbHeight > ClientSize.Height)
+            if(bullet.Bounds.IntersectsWith(enemy1.Bounds))
             {
-                pbVolY = -pbVolY;
+                score++;
+                explosion.Left = enemy1.Left;
+                explosion.Top = enemy1.Top;
+                explosion.Show();
+                shooting = false;
+                bullet.Hide();
+                enemy1.Left = ClientSize.Width;
+
             }
 
-            pictureBox2.Left = pb2X;
-
-            pb2X += pb2VolX;
-            if (pb2X > ClientSize.Width)
+            if (bullet.Bounds.IntersectsWith(enemy2.Bounds))
             {
-                pb2X = -pb2Width;
+                score++;
+                explosion.Left = enemy2.Left;
+                explosion.Top = enemy2.Top;
+                explosion.Show();
+                shooting = false;
+                bullet.Hide();
+                enemy2.Left = ClientSize.Width;
+            }
+            txtScore.Text = "Score: " + Convert.ToString(score);
+            txtEndScore.Text = "Score: " + Convert.ToString(score);
+
+            // Move enemy1 vertically
+            if (enemy1MovingUp)
+            {
+                enemy1.Top -= enemySpeed;
+            }
+            if (!enemy1MovingUp)
+            {
+                enemy1.Top += enemySpeed;
+            }
+            if (enemy1.Top <= 0)
+            {
+                enemy1MovingUp = false;
+            }
+            if (enemy1.Top + enemy1.Height >= ClientSize.Height || enemy1.Bounds.IntersectsWith(land.Bounds))
+            {
+                enemy1MovingUp = true;
             }
 
-            Rectangle labelRect = new Rectangle(objX, objY, objWidth, objHeight);
-            Rectangle pbRect = new Rectangle(pbX, pbY, pbWidth, pbHeight);
-            Rectangle pb2Rect = new Rectangle(pb2X, pb2Y, pb2Width, pb2Height);
-
-            // Collision with pictureBox1
-            if (labelRect.IntersectsWith(pbRect))
+            enemy1.Left -= enemySpeed;
+            if (enemy1.Left + enemy1.Width < 0)
             {
-                int tempX = volX;
-                int tempY = volY;
-                volX = pbVolX;
-                volY = pbVolY;
-                pbVolX = tempX;
-                pbVolY = tempY;
-
-                label1.ForeColor = Color.FromArgb(rnd.Next(255), rnd.Next(255), rnd.Next(255));
+                hp--;
+                enemy1.Left = ClientSize.Width + new Random().Next(50, 200);
             }
 
-            // Collision with pictureBox2 (horizontal wall)
-            if (labelRect.IntersectsWith(pb2Rect))
+            // Move enemy2
+            if (enemy2MovingUp)
             {
-                volX = -volX;
+                enemy2.Top -= enemySpeed;
+            }
+            if (!enemy2MovingUp)
+            {
+                enemy2.Top += enemySpeed;
+            }
+            if (enemy2.Top <= 0)
+            {
+                enemy2MovingUp = false;
+            }
+            if (enemy2.Top + enemy2.Height >= ClientSize.Height || enemy2.Bounds.IntersectsWith(land.Bounds))
+            {
+                enemy2MovingUp = true;
             }
 
-            // Make pictureBox1 also bounce from pictureBox2
-            if (pbRect.IntersectsWith(pb2Rect))
+            enemy2.Left -= enemySpeed;
+            if (enemy2.Left + enemy2.Width < 0)
             {
-                pbVolX = -pbVolX;
+                hp--;
+                enemy2.Left = ClientSize.Width + new Random().Next(50, 200);
             }
 
 
-            Refresh();
-        }
+            if (myPlane.Top < 0)
+            {
+                myPlane.Top = 0;
+            }
 
-        private void label1_Click(object sender, EventArgs e)
-        {
+            //Game rule
+            if (myPlane.Bounds.IntersectsWith(enemy1.Bounds))
+            {
+                explosion.Left = enemy1.Left;
+                explosion.Top = enemy1.Top;
+                explosion.Show();
+                hp -= 5;
+                enemy1.Left = ClientSize.Width + new Random().Next(50, 200);
+            }
+            if (myPlane.Bounds.IntersectsWith(enemy2.Bounds))
+            {
+                explosion.Left = enemy2.Left;
+                explosion.Top = enemy2.Top;
+                explosion.Show();
+                hp -= 5;
+                enemy2.Left = ClientSize.Width + new Random().Next(50, 200);
+            }
+            if (myPlane.Bounds.IntersectsWith(land.Bounds) || hp == 0)
+            {
+                txtGameOver.Show();
+                txtEndScore.Show();
+                explosion.Left = (explosion.Width + myPlane.Left) / 2;
+                explosion.Top = myPlane.Top - (myPlane.Height / 2);
+                explosion.Show();
+                timer1.Stop();
+            }
 
+            txtHP.Text = "HP: " + Convert.ToString(hp) + "/10";
         }
     }
 }
