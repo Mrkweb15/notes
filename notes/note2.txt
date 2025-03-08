@@ -16,7 +16,7 @@ namespace plane_defender
         bool enemy1MovingUp = true;
         bool enemy2MovingUp = false;
 
-        
+
         public Form1()
         {
             InitializeComponent();
@@ -24,12 +24,16 @@ namespace plane_defender
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            timer1.Stop();
             bullet.Hide();
             explosion.Hide();
-            txtGameOver.Hide();
-            txtEndScore.Hide();
+            txtGameOver.Text = "Plane Defender";
+            txtEndScore.Text = "BSIS-3C";
+            btnPlay.Text = "Play";
+            myPlane.Top = (myPlane.Height / 2) + (ClientSize.Height / 3);
             txtGameOver.Left = (ClientSize.Width - txtGameOver.Width) / 2;
             txtEndScore.Left = (ClientSize.Width - txtEndScore.Width) / 2;
+            btnPlay.Left = (ClientSize.Width - btnPlay.Width) / 2;
         }
 
         private void keyIDown(object sender, KeyEventArgs e)
@@ -62,18 +66,6 @@ namespace plane_defender
             {
                 shooting = false;
             }
-
-
-            if (!timer1.Enabled && e.KeyCode == Keys.Space)
-            {
-                timer1.Enabled = true;
-                myPlane.Top = (myPlane.Height / 2) + (ClientSize.Height / 2);
-                score = 0;
-                hp = 10;
-                txtGameOver.Hide();
-                txtEndScore.Hide();
-                explosion.Hide();
-            }
         }
 
 
@@ -94,16 +86,13 @@ namespace plane_defender
                 myPlane.Top += 10;
             }
 
-            //shooting
-            if (shooting)
+            // Shooting logic
+            if (shooting && !bullet.Visible)
             {
-                bullet.Left += enemySpeed;
-                bullet.Top = myPlane.Top + (myPlane.Height / 2) - (bullet.Height / 2);
                 bullet.Left = myPlane.Left + myPlane.Width;
+                bullet.Top = myPlane.Top + (myPlane.Height / 2) - (bullet.Height / 2);
                 bullet.Show();
-                bullet.Left += enemySpeed;
             }
-
             bullet.Left += BulletSpeed;
 
             if (bullet.Left > ClientSize.Width)
@@ -112,7 +101,7 @@ namespace plane_defender
                 shooting = false;
             }
 
-            if(bullet.Bounds.IntersectsWith(enemy1.Bounds))
+            if (bullet.Bounds.IntersectsWith(enemy1.Bounds))
             {
                 score++;
                 explosion.Left = enemy1.Left;
@@ -215,6 +204,10 @@ namespace plane_defender
             }
             if (myPlane.Bounds.IntersectsWith(land.Bounds) || hp <= 0)
             {
+                btnPlay.Enabled = true;
+                txtGameOver.Text = "Game Over Looser";
+                btnPlay.Text = "Play Again?";
+                btnPlay.Show();
                 txtGameOver.Show();
                 txtEndScore.Show();
                 explosion.Left = (explosion.Width + myPlane.Left) / 2;
@@ -225,5 +218,31 @@ namespace plane_defender
 
             txtHP.Text = "HP: " + Convert.ToString(hp) + "/10";
         }
+
+        private void btnPlay_Click(object sender, EventArgs e)
+        {
+            txtGameOver.Hide();
+            txtEndScore.Hide();
+            btnPlay.Hide();
+            timer1.Start();
+
+            myPlane.Top = (ClientSize.Height / 2) - (myPlane.Height / 2);
+            score = 0;
+            hp = 10;
+            enemySpeed = 5;
+            lastMilestone = 0;
+
+            enemy1.Left = ClientSize.Width + rnd.Next(50, 200);
+            enemy2.Left = ClientSize.Width + rnd.Next(50, 200);
+
+            explosion.Hide();
+            bullet.Hide();
+            bullet.Left = ClientSize.Width + 100;
+
+            shooting = false;
+            btnPlay.Enabled = false;
+        }
+
+
     }
 }
