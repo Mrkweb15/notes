@@ -4,16 +4,19 @@ namespace plane_defender
     {
         Random rnd = new Random();
         int score = 0;
+        int lastMilestone = 0;
         int hp = 10;
 
         //myPlane
         bool up, down, shooting = false;
-        int BulletSpeed = 20;
+        int BulletSpeed = 100;
 
         //enemy
         int enemySpeed = 5;
         bool enemy1MovingUp = true;
         bool enemy2MovingUp = false;
+
+        
         public Form1()
         {
             InitializeComponent();
@@ -76,6 +79,11 @@ namespace plane_defender
 
         private void timer1_Tick(object sender, EventArgs e)
         {
+            if (score % 10 == 0 && score != 0 && score != lastMilestone)
+            {
+                enemySpeed += 5;
+                lastMilestone = score;
+            }
 
             if (up)
             {
@@ -114,6 +122,7 @@ namespace plane_defender
                 bullet.Hide();
                 bullet.Left = 0;
                 enemy1.Left = ClientSize.Width;
+                bullet.Left = ClientSize.Width + 100;
 
             }
 
@@ -126,6 +135,7 @@ namespace plane_defender
                 shooting = false;
                 bullet.Hide();
                 enemy2.Left = ClientSize.Width;
+                bullet.Left = ClientSize.Width + 100;
             }
             txtScore.Text = "Score: " + Convert.ToString(score);
             txtEndScore.Text = "Score: " + Convert.ToString(score);
@@ -203,7 +213,7 @@ namespace plane_defender
                 hp -= 5;
                 enemy2.Left = ClientSize.Width + new Random().Next(50, 200);
             }
-            if (myPlane.Bounds.IntersectsWith(land.Bounds) || hp == 0)
+            if (myPlane.Bounds.IntersectsWith(land.Bounds) || hp <= 0)
             {
                 txtGameOver.Show();
                 txtEndScore.Show();
