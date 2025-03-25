@@ -9,7 +9,14 @@ namespace plane_defender
 
         //myPlane
         bool up, down, shooting = false;
-        int BulletSpeed = 100;
+
+        //bullet
+        //int BulletSpeed = 100;
+        //private List<PictureBox> lasers = new List<PictureBox>();
+        int BulletSpeed = 20;
+        private List<PictureBox> lasers = new List<PictureBox>();
+        private int shootCooldown = 200;
+        private DateTime lastShotTime = DateTime.Now;
 
         //enemy
         int enemySpeed = 5;
@@ -34,6 +41,7 @@ namespace plane_defender
             txtGameOver.Left = (ClientSize.Width - txtGameOver.Width) / 2;
             txtEndScore.Left = (ClientSize.Width - txtEndScore.Width) / 2;
             btnPlay.Left = (ClientSize.Width - btnPlay.Width) / 2;
+
         }
 
         private void keyIDown(object sender, KeyEventArgs e)
@@ -71,9 +79,11 @@ namespace plane_defender
 
         private void timer1_Tick(object sender, EventArgs e)
         {
+            
+
             if (score % 10 == 0 && score != 0 && score != lastMilestone)
             {
-                enemySpeed += 5;
+                enemySpeed += 2;
                 lastMilestone = score;
             }
 
@@ -86,46 +96,91 @@ namespace plane_defender
                 myPlane.Top += 10;
             }
 
-            // Shooting logic
-            if (shooting && !bullet.Visible)
-            {
-                bullet.Left = myPlane.Left + myPlane.Width;
-                bullet.Top = myPlane.Top + (myPlane.Height / 2) - (bullet.Height / 2);
-                bullet.Show();
-            }
-            bullet.Left += BulletSpeed;
+            //// Shooting logic
+            //if (shooting && !bullet.Visible)
+            //{
+            //    bullet.Left = myPlane.Left + myPlane.Width;
+            //    bullet.Top = myPlane.Top + (myPlane.Height / 2) - (bullet.Height / 2);
+            //    bullet.Show();
+            //}
+            //bullet.Left += BulletSpeed;
 
-            if (bullet.Left > ClientSize.Width)
+            //if (bullet.Left > ClientSize.Width)
+            //{
+            //    bullet.Hide();
+            //    shooting = false;
+            //}
+
+            // Shooting logic with delay
+            if (shooting && (DateTime.Now - lastShotTime).TotalMilliseconds > shootCooldown)
             {
-                bullet.Hide();
-                shooting = false;
+                lastShotTime = DateTime.Now;
+
+                PictureBox laser = new PictureBox
+                {
+                    Size = new Size(20, 5), 
+                    BackColor = Color.Red,
+                    Left = myPlane.Left + myPlane.Width, 
+                    Top = myPlane.Top + (myPlane.Height / 2) - 2 
+                };
+
+                this.Controls.Add(laser);
+                lasers.Add(laser);
             }
 
-            if (bullet.Bounds.IntersectsWith(enemy1.Bounds))
+            // Move bullets
+            for (int i = lasers.Count - 1; i >= 0; i--)
             {
-                score++;
-                explosion.Left = enemy1.Left;
-                explosion.Top = enemy1.Top;
-                explosion.Show();
-                shooting = false;
-                bullet.Hide();
-                bullet.Left = 0;
-                enemy1.Left = ClientSize.Width;
-                bullet.Left = ClientSize.Width + 100;
+                lasers[i].Left += BulletSpeed;
 
+                // Check collision with enemy1
+                if (lasers[i].Bounds.IntersectsWith(enemy1.Bounds))
+                {
+                    score++;
+                    explosion.Left = enemy1.Left;
+                    explosion.Top = enemy1.Top;
+                    explosion.Show();
+
+                    // Reset enemy position
+                    enemy1.Left = ClientSize.Width + new Random().Next(50, 200);
+
+                    // Remove the laser
+                    this.Controls.Remove(lasers[i]);
+                    lasers[i].Dispose();
+                    lasers.RemoveAt(i);
+                    continue; 
+                }
+
+                // Check collision with enemy2
+                if (lasers[i].Bounds.IntersectsWith(enemy2.Bounds))
+                {
+                    score++;
+                    explosion.Left = enemy2.Left;
+                    explosion.Top = enemy2.Top;
+                    explosion.Show();
+
+                    // Reset enemy position
+                    enemy2.Left = ClientSize.Width + new Random().Next(50, 200);
+
+                    // Remove the laser
+                    this.Controls.Remove(lasers[i]);
+                    lasers[i].Dispose();
+                    lasers.RemoveAt(i);
+                    continue;
+                }
+
+                // Remove bullets if they leave the screen
+                if (lasers[i].Left > ClientSize.Width)
+                {
+                    this.Controls.Remove(lasers[i]);
+                    lasers[i].Dispose();
+                    lasers.RemoveAt(i);
+                }
             }
 
-            if (bullet.Bounds.IntersectsWith(enemy2.Bounds))
-            {
-                score++;
-                explosion.Left = enemy2.Left;
-                explosion.Top = enemy2.Top;
-                explosion.Show();
-                shooting = false;
-                bullet.Hide();
-                enemy2.Left = ClientSize.Width;
-                bullet.Left = ClientSize.Width + 100;
-            }
+
+
+
             txtScore.Text = "Score: " + Convert.ToString(score);
             txtEndScore.Text = "Score: " + Convert.ToString(score);
 
@@ -204,6 +259,8 @@ namespace plane_defender
             }
             if (myPlane.Bounds.IntersectsWith(land.Bounds) || hp <= 0)
             {
+                txtHP.Hide();
+                txtScore.Hide();
                 btnPlay.Enabled = true;
                 txtGameOver.Text = "Game Over Looser";
                 btnPlay.Text = "Play Again?";
