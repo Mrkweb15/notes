@@ -1,7 +1,191 @@
-MARK----  https://drive.google.com/file/d/1Q-4LTByZTVJMBAkalgJkruravky_-ciF/view?usp=sharing
-LEI---- https://drive.google.com/file/d/1AxmbYUDAv6CLXQCyPHvZgGAX9vyR46T0/view?usp=sharing
+namespace Snake_Game
+{
+    public partial class Form1 : Form
+    {
+        private List<Circle> Snake = new List<Circle>();
+        private Circle food = new Circle();
+        int maxWidth, maxHeight, score, highScore;
+        Random rnd = new Random();
+        bool goLeft, goRight, goUp, goDown;
+        public Form1()
+        {
+            InitializeComponent();
+            new Settings();
+        }
 
+        private void keyIsDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Left && Settings.direction != "right")
+            {
+                goLeft = true;
+            }
+            if (e.KeyCode == Keys.Right && Settings.direction != "left")
+            {
+                goRight = true;
+            }
+            if (e.KeyCode == Keys.Up && Settings.direction != "down")
+            {
+                goUp = true;
+            }
+            if (e.KeyCode == Keys.Down && Settings.direction != "up")
+            {
+                goDown = true;
+            }
+        }
 
+        private void KeyIsUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Left)
+            {
+                goLeft = false;
+            }
+            if (e.KeyCode == Keys.Right)
+            {
+                goRight = false;
+            }
+            if (e.KeyCode == Keys.Up)
+            {
+                goUp = false;
+            }
+            if (e.KeyCode == Keys.Down)
+            {
+                goDown = false;
+            }
+        }
 
+        private void GameTimer_Tick(object sender, EventArgs e)
+        {
+            if (goLeft) Settings.direction = "left";
+            if (goRight) Settings.direction = "right";
+            if (goUp) Settings.direction = "up";
+            if (goDown) Settings.direction = "down";
 
-https://drive.google.com/drive/folders/12olAqPFuI6s6nsgC3S41K395eOnGVGXG?usp=sharing
+            for (int i = Snake.Count - 1; i >= 0; i--)
+            {
+                if (i == 0)
+                {
+                    switch (Settings.direction)
+                    {
+                        case "left":
+                            Snake[i].X--;
+                            break;
+                        case "right":
+                            Snake[i].X++;
+                            break;
+                        case "up":
+                            Snake[i].Y--;
+                            break;
+                        case "down":
+                            Snake[i].Y++;
+                            break;
+                    }
+
+                    if (Snake[i].X < 0) Snake[i].X = maxWidth - 1;
+                    if (Snake[i].X >= maxWidth) Snake[i].X = 0;
+                    if (Snake[i].Y < 0) Snake[i].Y = maxHeight - 1;
+                    if (Snake[i].Y >= maxHeight) Snake[i].Y = 0;
+
+                    if (Snake[i].X == food.X && Snake[i].Y == food.Y)
+                    {
+                        EatFood();
+                    }
+
+                    for (int j = 1; j < Snake.Count; j++)
+                    {
+                        if (Snake[i].X == Snake[j].X && Snake[i].Y == Snake[j].Y)
+                        {
+                            GameOver();
+                        }
+                    }
+                }
+                else
+                {
+                    Snake[i].X = Snake[i - 1].X;
+                    Snake[i].Y = Snake[i - 1].Y;
+                }
+            }
+            pbCanvas.Invalidate();
+        }
+
+        private void updateGraphics(object sender, PaintEventArgs e)
+        {
+            Graphics canvas = e.Graphics;
+            Brush snakeColour;
+            for (int i = 0; i < Snake.Count; i++)
+            {
+                if (i == 0)
+                {
+                    snakeColour = Brushes.Black;
+                }
+                else
+                {
+                    snakeColour = Brushes.DarkGray;
+                }
+                canvas.FillEllipse(snakeColour, new Rectangle
+                    (
+                        Snake[i].X * Settings.Width,
+                        Snake[i].Y * Settings.Height,
+                        Settings.Width, Settings.Height
+                    ));
+            }
+            canvas.FillEllipse(Brushes.DarkRed, new RectangleF
+                (
+                    food.X * Settings.Width,
+                    food.Y * Settings.Height,
+                    Settings.Width, Settings.Height
+                ));
+        }
+
+        public void RestartGame()
+        {
+            maxWidth = pbCanvas.Width / Settings.Width;
+            maxHeight = pbCanvas.Height / Settings.Height;
+            Snake.Clear();
+            StartButton.Enabled = false;
+            StartButton.Hide();
+            score = 0;
+            lblScore.Text = "Score: " + score;
+            Circle head = new Circle { X = 10, Y = 5 };
+            Snake.Add(head);
+            for (int i = 0; i < 5; i++)
+            {
+                Circle body = new Circle();
+                Snake.Add(body);
+            }
+            food = new Circle { X = rnd.Next(2, maxWidth), Y = rnd.Next(2, maxHeight) };
+            GameTimer.Start();
+        }
+
+        public void EatFood()
+        {
+            score++;
+            lblScore.Text = "Score: " + score;
+            Circle body = new Circle()
+            {
+                X = Snake[Snake.Count - 1].X,
+                Y = Snake[Snake.Count - 1].Y
+            };
+            Snake.Add(body);
+            food = new Circle { X = rnd.Next(2, maxWidth), Y = rnd.Next(2, maxHeight) };
+        }
+
+        public void GameOver()
+        {
+            GameTimer.Stop();
+            StartButton.Enabled = true;
+            StartButton.Show();
+            if (score > highScore)
+            {
+                highScore = score;
+                lblHScore.Text = "High Score: " + Environment.NewLine + highScore;
+                lblHScore.ForeColor = Color.Maroon;
+                lblHScore.TextAlign = ContentAlignment.MiddleCenter;
+            }
+        }
+
+        private void StartButton_Click(object sender, EventArgs e)
+        {
+            RestartGame();
+        }
+    }
+}
