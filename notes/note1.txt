@@ -1,191 +1,183 @@
-namespace Snake_Game
+Notes Not Available
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace circle_clash
 {
     public partial class Form1 : Form
     {
-        private List<Circle> Snake = new List<Circle>();
-        private Circle food = new Circle();
-        int maxWidth, maxHeight, score, highScore;
-        Random rnd = new Random();
-        bool goLeft, goRight, goUp, goDown;
+        List<Circle> pellets = new List<Circle>();
+        Circle player;
+
         public Form1()
         {
             InitializeComponent();
-            new Settings();
+            this.DoubleBuffered = true;
+
+            gameTimer.Interval = 20;
+            gameTimer.Start();
+
+            player = new Circle(200, 200, 20, Color.Blue);
+            GeneratePellets(50);
         }
 
-        private void keyIsDown(object sender, KeyEventArgs e)
+        void GeneratePellets(int count)
         {
-            if (e.KeyCode == Keys.Left && Settings.direction != "right")
+            Random rand = new Random();
+            for (int i = 0; i < count; i++)
             {
-                goLeft = true;
-            }
-            if (e.KeyCode == Keys.Right && Settings.direction != "left")
-            {
-                goRight = true;
-            }
-            if (e.KeyCode == Keys.Up && Settings.direction != "down")
-            {
-                goUp = true;
-            }
-            if (e.KeyCode == Keys.Down && Settings.direction != "up")
-            {
-                goDown = true;
+                int x = rand.Next(0, this.ClientSize.Width);
+                int y = rand.Next(0, this.ClientSize.Height);
+                pellets.Add(new Circle(x, y, 1, Color.Green));
             }
         }
 
-        private void KeyIsUp(object sender, KeyEventArgs e)
+        private void gameTimer_Tick(object sender, EventArgs e)
         {
-            if (e.KeyCode == Keys.Left)
+            if (player.Radius * 2 >= this.ClientSize.Width || player.Radius * 2 >= this.ClientSize.Height)
             {
-                goLeft = false;
+                gameTimer.Stop();
+                MessageBox.Show("Max Size Reached!", "Circle Clash", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                ResetGame();
             }
-            if (e.KeyCode == Keys.Right)
-            {
-                goRight = false;
-            }
-            if (e.KeyCode == Keys.Up)
-            {
-                goUp = false;
-            }
-            if (e.KeyCode == Keys.Down)
-            {
-                goDown = false;
-            }
-        }
 
-        private void GameTimer_Tick(object sender, EventArgs e)
-        {
-            if (goLeft) Settings.direction = "left";
-            if (goRight) Settings.direction = "right";
-            if (goUp) Settings.direction = "up";
-            if (goDown) Settings.direction = "down";
 
-            for (int i = Snake.Count - 1; i >= 0; i--)
+            Point mouse = this.PointToClient(Cursor.Position);
+            float dx = mouse.X - player.X;
+            float dy = mouse.Y - player.Y;
+            float dist = (float)Math.Sqrt(dx * dx + dy * dy);
+
+            if (dist > 1)
             {
-                if (i == 0)
+                player.X += dx * 0.05f;
+                player.Y += dy * 0.05f;
+            }
+
+            player.X = Math.Max(player.Radius, Math.Min(this.ClientSize.Width - player.Radius, player.X));
+            player.Y = Math.Max(player.Radius, Math.Min(this.ClientSize.Height - player.Radius, player.Y));
+
+            for (int i = 0; i < pellets.Count; i++)
+            {
+                if (player.Intersects(pellets[i]))
                 {
-                    switch (Settings.direction)
-                    {
-                        case "left":
-                            Snake[i].X--;
-                            break;
-                        case "right":
-                            Snake[i].X++;
-                            break;
-                        case "up":
-                            Snake[i].Y--;
-                            break;
-                        case "down":
-                            Snake[i].Y++;
-                            break;
-                    }
+                    player.Radius += 0.5f;
 
-                    if (Snake[i].X < 0) Snake[i].X = maxWidth - 1;
-                    if (Snake[i].X >= maxWidth) Snake[i].X = 0;
-                    if (Snake[i].Y < 0) Snake[i].Y = maxHeight - 1;
-                    if (Snake[i].Y >= maxHeight) Snake[i].Y = 0;
+                    Random rand = new Random();
 
-                    if (Snake[i].X == food.X && Snake[i].Y == food.Y)
-                    {
-                        EatFood();
-                    }
+                    int minX = (int)player.Radius;
+                    int maxX = Math.Max(minX + 1, this.ClientSize.Width - (int)player.Radius);
+                    int newX = rand.Next(minX, maxX);
 
-                    for (int j = 1; j < Snake.Count; j++)
-                    {
-                        if (Snake[i].X == Snake[j].X && Snake[i].Y == Snake[j].Y)
-                        {
-                            GameOver();
-                        }
-                    }
-                }
-                else
-                {
-                    Snake[i].X = Snake[i - 1].X;
-                    Snake[i].Y = Snake[i - 1].Y;
+                    int minY = (int)player.Radius;
+                    int maxY = Math.Max(minY + 1, this.ClientSize.Height - (int)player.Radius);
+                    int newY = rand.Next(minY, maxY);
+
+                    pellets[i] = new Circle(newX, newY, 5, Color.Green);
+
                 }
             }
-            pbCanvas.Invalidate();
+
+
+            Invalidate();
         }
 
-        private void updateGraphics(object sender, PaintEventArgs e)
+        private void pain(object sender, PaintEventArgs e)
         {
-            Graphics canvas = e.Graphics;
-            Brush snakeColour;
-            for (int i = 0; i < Snake.Count; i++)
-            {
-                if (i == 0)
-                {
-                    snakeColour = Brushes.Black;
-                }
-                else
-                {
-                    snakeColour = Brushes.DarkGray;
-                }
-                canvas.FillEllipse(snakeColour, new Rectangle
-                    (
-                        Snake[i].X * Settings.Width,
-                        Snake[i].Y * Settings.Height,
-                        Settings.Width, Settings.Height
-                    ));
-            }
-            canvas.FillEllipse(Brushes.DarkRed, new RectangleF
-                (
-                    food.X * Settings.Width,
-                    food.Y * Settings.Height,
-                    Settings.Width, Settings.Height
-                ));
+            Graphics g = e.Graphics;
+            player.Draw(g);
+            foreach (var p in pellets)
+                p.Draw(g);
         }
 
-        public void RestartGame()
+        void ResetGame()
         {
-            maxWidth = pbCanvas.Width / Settings.Width;
-            maxHeight = pbCanvas.Height / Settings.Height;
-            Snake.Clear();
-            StartButton.Enabled = false;
-            StartButton.Hide();
-            score = 0;
-            lblScore.Text = "Score: " + score;
-            Circle head = new Circle { X = 10, Y = 5 };
-            Snake.Add(head);
-            for (int i = 0; i < 5; i++)
-            {
-                Circle body = new Circle();
-                Snake.Add(body);
-            }
-            food = new Circle { X = rnd.Next(2, maxWidth), Y = rnd.Next(2, maxHeight) };
-            GameTimer.Start();
+            player = new Circle(200, 200, 20, Color.Blue);
+            pellets.Clear();
+            GeneratePellets(50);
+            gameTimer.Start();
         }
 
-        public void EatFood()
+    }
+
+}
+
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace circle_clash
+{
+    public class Circle
+    {
+        public float X, Y, Radius;
+        public Color Color;
+
+        public Circle(float x, float y, float radius, Color color)
         {
-            score++;
-            lblScore.Text = "Score: " + score;
-            Circle body = new Circle()
-            {
-                X = Snake[Snake.Count - 1].X,
-                Y = Snake[Snake.Count - 1].Y
-            };
-            Snake.Add(body);
-            food = new Circle { X = rnd.Next(2, maxWidth), Y = rnd.Next(2, maxHeight) };
+            X = x;
+            Y = y;
+            Radius = radius;
+            Color = color;
         }
 
-        public void GameOver()
+        public void Draw(Graphics g)
         {
-            GameTimer.Stop();
-            StartButton.Enabled = true;
-            StartButton.Show();
-            if (score > highScore)
+            using (Brush b = new SolidBrush(Color))
             {
-                highScore = score;
-                lblHScore.Text = "High Score: " + Environment.NewLine + highScore;
-                lblHScore.ForeColor = Color.Maroon;
-                lblHScore.TextAlign = ContentAlignment.MiddleCenter;
+                g.FillEllipse(b, X - Radius, Y - Radius, Radius * 2, Radius * 2);
             }
         }
 
-        private void StartButton_Click(object sender, EventArgs e)
+        public bool Intersects(Circle other)
         {
-            RestartGame();
+            float dx = X - other.X;
+            float dy = Y - other.Y;
+            float distance = (float)Math.Sqrt(dx * dx + dy * dy);
+            return distance < Radius + other.Radius;
         }
     }
 }
