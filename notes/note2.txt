@@ -6,3 +6,177 @@ I can read your IP
    Subnet Mask . . . . . . . . . . . : 255.255.255.0
    Default Gateway . . . . . . . . . :
    MAC . . . . . . . . . . . . . . . : **:**:**:**:**:**
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace circle_clash
+{
+    public partial class Form1 : Form
+    {
+        List<Circle> pellets = new List<Circle>();
+        Circle player;
+
+        private bool upPressed = false;
+        private bool downPressed = false;
+        private bool leftPressed = false;
+        private bool rightPressed = false;
+        private float moveSpeed = 5f; // Adjust this value to change movement speed
+
+        public Form1()
+        {
+            InitializeComponent();
+            this.DoubleBuffered = true;
+
+            gameTimer.Interval = 20;
+            gameTimer.Start();
+
+            player = new Circle(200, 200, 20, Color.Blue);
+            GeneratePellets(50);
+
+            this.KeyPreview = true;
+        }
+
+        void GeneratePellets(int count)
+        {
+            Random rand = new Random();
+            for (int i = 0; i < count; i++)
+            {
+                int x = rand.Next(0, this.ClientSize.Width);
+                int y = rand.Next(0, this.ClientSize.Height);
+                pellets.Add(new Circle(x, y, 1, Color.Green));
+            }
+        }
+
+        private void gameTimer_Tick(object sender, EventArgs e)
+        {
+            if (player.Radius * 2 >= this.ClientSize.Width || player.Radius * 2 >= this.ClientSize.Height)
+            {
+                gameTimer.Stop();
+                MessageBox.Show("Max Size Reached!", "Circle Clash", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                ResetGame();
+            }
+
+            // Handle movement based on key states
+            if (upPressed) player.Y -= moveSpeed;
+            if (downPressed) player.Y += moveSpeed;
+            if (leftPressed) player.X -= moveSpeed;
+            if (rightPressed) player.X += moveSpeed;
+
+            player.X = Math.Max(player.Radius, Math.Min(this.ClientSize.Width - player.Radius, player.X));
+            player.Y = Math.Max(player.Radius, Math.Min(this.ClientSize.Height - player.Radius, player.Y));
+
+
+            player.X = Math.Max(player.Radius, Math.Min(this.ClientSize.Width - player.Radius, player.X));
+            player.Y = Math.Max(player.Radius, Math.Min(this.ClientSize.Height - player.Radius, player.Y));
+
+            for (int i = 0; i < pellets.Count; i++)
+            {
+                if (player.Intersects(pellets[i]))
+                {
+                    player.Radius += 0.5f;
+
+                    Random rand = new Random();
+
+                    int minX = (int)player.Radius;
+                    int maxX = Math.Max(minX + 1, this.ClientSize.Width - (int)player.Radius);
+                    int newX = rand.Next(minX, maxX);
+
+                    int minY = (int)player.Radius;
+                    int maxY = Math.Max(minY + 1, this.ClientSize.Height - (int)player.Radius);
+                    int newY = rand.Next(minY, maxY);
+
+                    pellets[i] = new Circle(newX, newY, 5, Color.Green);
+
+                }
+            }
+
+
+            Invalidate();
+        }
+
+        private void pain(object sender, PaintEventArgs e)
+        {
+            Graphics g = e.Graphics;
+            player.Draw(g);
+            foreach (var p in pellets)
+                p.Draw(g);
+        }
+
+        void ResetGame()
+        {
+            player = new Circle(200, 200, 20, Color.Blue);
+            pellets.Clear();
+            GeneratePellets(50);
+            gameTimer.Start();
+        }
+        private void keyIsDown(object sender, KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.Up:
+                    upPressed = true;
+                    break;
+                case Keys.Down:
+                    downPressed = true;
+                    break;
+                case Keys.Left:
+                    leftPressed = true;
+                    break;
+                case Keys.Right:
+                    rightPressed = true;
+                    break;
+            }
+
+        }
+
+        private void keyisUp(object sender, KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.Up:
+                    upPressed = false;
+                    break;
+                case Keys.Down:
+                    downPressed = false;
+                    break;
+                case Keys.Left:
+                    leftPressed = false;
+                    break;
+                case Keys.Right:
+                    rightPressed = false;
+                    break;
+            }
+        }
+
+    }
+
+}
