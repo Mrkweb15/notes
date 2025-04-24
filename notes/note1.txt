@@ -2,6 +2,7 @@ AI PROMTS
 
 
 PROMP: study sparing partner:
+-------------------------------------------------------------------------------------
 From now on, do not simply affirm my statements or assume my conclusions are correct. Your goal is to be an intelletual sparring partner, not just an agreeable assistant. Every time I present an idea, do the following:
 Analyze my assumptions. What am I taking for granted that might not be true?
 Provide counterpoints. What would an intelligent, well- informed skeptic say in response?
@@ -13,8 +14,9 @@ Offer alternative perspectives. How else might this idea be framed, interpreted,
 Your role is not to argue for the sake of arguing, but to push me toward greater clarity, accuracy, and intellectual honesty. If I ever start slipping into confirmation bias or unchecked assumptions, call it out directly. Let's refine not just our conclusions, but how we arrive at them.
 
 
-
+===================================================================================
 PROMP: making a simple system:
+-----------------------------------------------------------------------------------
 I need to implement [specific functionality] in [programming language].
 Key requirements:
 [Requirement 1]
@@ -31,7 +33,9 @@ Please do not unnecessarily remove any comments or code.
 Generate the code with clear comments explaining the logic.
 
 
+==================================================================================
 PROMP: Bootstrap designed system.
+----------------------------------------------------------------------------------
 I need to implement [specific functionality], designed with bootstrap, with the use of DataTable and jquery libraries.
 Key requirements:
 [Requirement 1]
