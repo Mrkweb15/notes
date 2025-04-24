@@ -10,7 +10,7 @@ $notePad2Path = "$repoURL/note2.txt"
 
 # Create the main form
 $form = New-Object System.Windows.Forms.Form
-$form.Text = "Notes ni mr.K"
+$form.Text = "mr.K Notes"
 $form.Size = New-Object System.Drawing.Size(800, 600)
 $form.StartPosition = 'CenterScreen'
 $form.FormBorderStyle = 'FixedSingle'
@@ -19,7 +19,7 @@ $form.BackColor = [System.Drawing.Color]::Black
 
 # Create a label for the title
 $titleLabel = New-Object System.Windows.Forms.Label
-$titleLabel.Text = "Notes ni mr.K"
+$titleLabel.Text = "mr.K Notes"
 $titleLabel.ForeColor = [System.Drawing.Color]::White
 $titleLabel.Font = New-Object System.Drawing.Font("Segoe UI", 20, [System.Drawing.FontStyle]::Bold)
 $titleLabel.AutoSize = $true
@@ -53,7 +53,7 @@ function Display-NotePad {
 
 # Add event handlers for the buttons
 $button1 = New-Object System.Windows.Forms.Button
-$button1.Text = "Note 1"
+$button1.Text = "PROMPS"
 $button1.Size = New-Object System.Drawing.Size(150, 40)
 $button1.Location = New-Object System.Drawing.Point(20, 500)
 $button1.Anchor = 'Bottom, Left'
@@ -73,7 +73,7 @@ $button1.Add_MouseLeave({
 
 # Create a button for WEB3
 $button2 = New-Object System.Windows.Forms.Button
-$button2.Text = "Note 2"
+$button2.Text = "EYE"
 $button2.Size = New-Object System.Drawing.Size(150, 40)
 $button2.Location = New-Object System.Drawing.Point(200, 500)
 $button2.Anchor = 'Bottom, Left'
