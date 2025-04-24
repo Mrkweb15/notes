@@ -1,183 +1,49 @@
-Notes Not Available
+AI PROMTS
 
 
+PROMP: study sparing partner:
+From now on, do not simply affirm my statements or assume my conclusions are correct. Your goal is to be an intelletual sparring partner, not just an agreeable assistant. Every time I present an idea, do the following:
+Analyze my assumptions. What am I taking for granted that might not be true?
+Provide counterpoints. What would an intelligent, well- informed skeptic say in response?
+Test my reasoning. Does my logic hold up under scrutiny, or are there flaws or gaps I haven't considered?
+Offer alternative perspectives. How else might this idea be framed, interpreted, or challenged?
 
+5.Prioritize truth over agreement. If I am wrong or my logic is weak, I need to know. Correct me clearly and explain why." Maintain a constructive, but rigorous, approach.
 
+Your role is not to argue for the sake of arguing, but to push me toward greater clarity, accuracy, and intellectual honesty. If I ever start slipping into confirmation bias or unchecked assumptions, call it out directly. Let's refine not just our conclusions, but how we arrive at them.
 
 
 
+PROMP: making a simple system:
+I need to implement [specific functionality] in [programming language].
+Key requirements:
+[Requirement 1]
+[Requirement 2]
+[Requirement 3]
 
+Please consider:
+Error handling
+Edge cases
+Performance optimization
+Best practices for [language/framework]
 
+Please do not unnecessarily remove any comments or code.
+Generate the code with clear comments explaining the logic.
 
 
+PROMP: Bootstrap designed system.
+I need to implement [specific functionality], designed with bootstrap, with the use of DataTable and jquery libraries.
+Key requirements:
+[Requirement 1]
+[Requirement 2]
+[Requirement 3]
+Responsive for multiple device ratio
 
+Please consider:
+Error handling
+Edge cases
+Performance optimization
+Best practices for [language/framework]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-namespace circle_clash
-{
-    public partial class Form1 : Form
-    {
-        List<Circle> pellets = new List<Circle>();
-        Circle player;
-
-        public Form1()
-        {
-            InitializeComponent();
-            this.DoubleBuffered = true;
-
-            gameTimer.Interval = 20;
-            gameTimer.Start();
-
-            player = new Circle(200, 200, 20, Color.Blue);
-            GeneratePellets(50);
-        }
-
-        void GeneratePellets(int count)
-        {
-            Random rand = new Random();
-            for (int i = 0; i < count; i++)
-            {
-                int x = rand.Next(0, this.ClientSize.Width);
-                int y = rand.Next(0, this.ClientSize.Height);
-                pellets.Add(new Circle(x, y, 1, Color.Green));
-            }
-        }
-
-        private void gameTimer_Tick(object sender, EventArgs e)
-        {
-            if (player.Radius * 2 >= this.ClientSize.Width || player.Radius * 2 >= this.ClientSize.Height)
-            {
-                gameTimer.Stop();
-                MessageBox.Show("Max Size Reached!", "Circle Clash", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                ResetGame();
-            }
-
-
-            Point mouse = this.PointToClient(Cursor.Position);
-            float dx = mouse.X - player.X;
-            float dy = mouse.Y - player.Y;
-            float dist = (float)Math.Sqrt(dx * dx + dy * dy);
-
-            if (dist > 1)
-            {
-                player.X += dx * 0.05f;
-                player.Y += dy * 0.05f;
-            }
-
-            player.X = Math.Max(player.Radius, Math.Min(this.ClientSize.Width - player.Radius, player.X));
-            player.Y = Math.Max(player.Radius, Math.Min(this.ClientSize.Height - player.Radius, player.Y));
-
-            for (int i = 0; i < pellets.Count; i++)
-            {
-                if (player.Intersects(pellets[i]))
-                {
-                    player.Radius += 0.5f;
-
-                    Random rand = new Random();
-
-                    int minX = (int)player.Radius;
-                    int maxX = Math.Max(minX + 1, this.ClientSize.Width - (int)player.Radius);
-                    int newX = rand.Next(minX, maxX);
-
-                    int minY = (int)player.Radius;
-                    int maxY = Math.Max(minY + 1, this.ClientSize.Height - (int)player.Radius);
-                    int newY = rand.Next(minY, maxY);
-
-                    pellets[i] = new Circle(newX, newY, 5, Color.Green);
-
-                }
-            }
-
-
-            Invalidate();
-        }
-
-        private void pain(object sender, PaintEventArgs e)
-        {
-            Graphics g = e.Graphics;
-            player.Draw(g);
-            foreach (var p in pellets)
-                p.Draw(g);
-        }
-
-        void ResetGame()
-        {
-            player = new Circle(200, 200, 20, Color.Blue);
-            pellets.Clear();
-            GeneratePellets(50);
-            gameTimer.Start();
-        }
-
-    }
-
-}
-
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace circle_clash
-{
-    public class Circle
-    {
-        public float X, Y, Radius;
-        public Color Color;
-
-        public Circle(float x, float y, float radius, Color color)
-        {
-            X = x;
-            Y = y;
-            Radius = radius;
-            Color = color;
-        }
-
-        public void Draw(Graphics g)
-        {
-            using (Brush b = new SolidBrush(Color))
-            {
-                g.FillEllipse(b, X - Radius, Y - Radius, Radius * 2, Radius * 2);
-            }
-        }
-
-        public bool Intersects(Circle other)
-        {
-            float dx = X - other.X;
-            float dy = Y - other.Y;
-            float distance = (float)Math.Sqrt(dx * dx + dy * dy);
-            return distance < Radius + other.Radius;
-        }
-    }
-}
+Please do not unnecessarily remove any comments or code.
+Generate the code with clear comments explaining the logic.
